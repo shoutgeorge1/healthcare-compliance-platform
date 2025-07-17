@@ -5,7 +5,8 @@ function IntakeWizard({ onComplete }) {
   const [stepIndex, setStepIndex] = useState(0);
   const [answers, setAnswers] = useState({});
 
-  const currentQuestion = questions[stepIndex];
+import questions from './questions';
+const currentQuestion = questions[stepIndex];
 
   const handleAnswer = (answer) => {
     const updatedAnswers = { ...answers, [currentQuestion.id]: answer };
