@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import StepOne from './StepOne';
 import ReportCard from './ReportCard';
-// We'll dynamically import the right question set soon
 
 function IntakeWizard({ onComplete }) {
   const [stepIndex, setStepIndex] = useState(0);
@@ -12,11 +11,11 @@ function IntakeWizard({ onComplete }) {
   const handleStepOneComplete = ({ businessType, state }) => {
     setBusinessMeta({ businessType, state });
 
-    // TEMP: Load a placeholder set (you'll replace this with real sets for each type)
+    // This will later be replaced by dynamic logic
     const placeholderQuestions = [
       {
         id: 'q1',
-        section: 'Example Compliance Question',
+        section: 'Data Collection',
         description: `Does your ${businessType} collect patient data online in ${state}?`,
         options: [
           { value: 'yes', label: 'Yes' },
@@ -25,8 +24,8 @@ function IntakeWizard({ onComplete }) {
       },
       {
         id: 'q2',
-        section: 'Data Privacy',
-        description: 'Do you use third-party tracking tools like Meta Pixel or Google Analytics on lead forms or booking flows?',
+        section: '3rd-Party Tracking',
+        description: 'Do you use tools like Meta Pixel or Google Analytics on booking or lead forms?',
         options: [
           { value: 'yes', label: 'Yes, actively using them' },
           { value: 'no', label: 'No, none at all' },
