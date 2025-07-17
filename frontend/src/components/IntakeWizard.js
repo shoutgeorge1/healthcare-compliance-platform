@@ -1,20 +1,51 @@
 import React, { useState } from 'react';
+import StepOne from './StepOne';
 import ReportCard from './ReportCard';
-import questions from './questions'; // ✅ Move it here
+// We'll dynamically import the right question set soon
 
 function IntakeWizard({ onComplete }) {
   const [stepIndex, setStepIndex] = useState(0);
   const [answers, setAnswers] = useState({});
+  const [businessMeta, setBusinessMeta] = useState(null);
+  const [questionSet, setQuestionSet] = useState([]);
 
-  const currentQuestion = questions[stepIndex];
+  const handleStepOneComplete = ({ businessType, state }) => {
+    setBusinessMeta({ businessType, state });
+
+    // TEMP: Load a placeholder set (you'll replace this with real sets for each type)
+    const placeholderQuestions = [
+      {
+        id: 'q1',
+        section: 'Example Compliance Question',
+        description: `Does your ${businessType} collect patient data online in ${state}?`,
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+      },
+      {
+        id: 'q2',
+        section: 'Data Privacy',
+        description: 'Do you use third-party tracking tools like Meta Pixel or Google Analytics on lead forms or booking flows?',
+        options: [
+          { value: 'yes', label: 'Yes, actively using them' },
+          { value: 'no', label: 'No, none at all' },
+          { value: 'unsure', label: 'I’m not sure' },
+        ],
+      },
+    ];
+
+    setQuestionSet(placeholderQuestions);
+  };
+
+  const currentQuestion = questionSet[stepIndex];
 
   const handleAnswer = (answer) => {
     const updatedAnswers = { ...answers, [currentQuestion.id]: answer };
     setAnswers(updatedAnswers);
 
-    const nextStep = currentQuestion.next?.[answer] ?? stepIndex + 1;
-
-    if (nextStep >= questions.length || !questions[nextStep]) {
+    const nextStep = stepIndex + 1;
+    if (nextStep >= questionSet.length) {
       const reportData = generateReportCard(updatedAnswers);
       onComplete(reportData);
     } else {
@@ -25,20 +56,22 @@ function IntakeWizard({ onComplete }) {
   const generateReportCard = (answers) => {
     let score = 100;
 
+    if (answers.q1 === 'yes') score -= 15;
     if (answers.q2 === 'yes') score -= 20;
-    if (answers.q3 === 'no') score -= 15;
-    if (answers.q4 === 'no') score -= 10;
+    if (answers.q2 === 'unsure') score -= 10;
 
     return {
       overallScore: score,
+      businessType: businessMeta?.businessType,
+      state: businessMeta?.state,
       breakdown: [
-        { area: 'HIPAA', score: answers.q2 === 'yes' ? 80 : 100 },
-        { area: 'TCPA', score: answers.q3 === 'no' ? 85 : 100 },
-        { area: 'FDA/FTC', score: answers.q4 === 'no' ? 90 : 100 },
+        { area: 'HIPAA / Data Collection', score: answers.q1 === 'yes' ? 85 : 100 },
+        { area: 'Pixels / 3rd-Party Tracking', score: answers.q2 === 'yes' ? 80 : answers.q2 === 'unsure' ? 90 : 100 },
       ],
     };
   };
 
+  if (!businessMeta) return <StepOne onNext={handleStepOneComplete} />;
   if (!currentQuestion) return <ReportCard answers={answers} />;
 
   return (
