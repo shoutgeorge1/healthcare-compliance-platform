@@ -86,10 +86,10 @@ const ReportCard = ({ answers = sampleAnswers, businessType = "Clinical care (in
   };
 
 const riskWeights = {
-  critical: 4,
-  high: 3,
-  medium: 2,
-  low: 1
+  critical: 5,
+  high: 4,
+  medium: 3,
+  low: 2
 };
 
 const sectionScores = useMemo(() => {
@@ -113,11 +113,11 @@ const sectionScores = useMemo(() => {
         maxPoints += weight;
 
         if (Array.isArray(answer)) {
-          totalPoints += weight * 0.75; // generous multi-select partial credit
+          totalPoints += weight * 1.75; // generous multi-select partial credit
         } else if (
           ['yes', 'yes_both', 'yes_automated', 'yes_controlled', 'yes_clinical', 'yes_peer_reviewed'].includes(answer)
         ) {
-          totalPoints += weight * 1.25; // super-boost for yes answers
+          totalPoints += weight * 2; // super-boost for yes answers
         } else if (answer === 'unsure') {
           totalPoints += weight * 0.75; // softer penalty
         }
