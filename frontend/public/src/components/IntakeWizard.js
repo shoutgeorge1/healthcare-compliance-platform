@@ -1,105 +1,80 @@
-// src/components/IntakeWizard.js
-import React, { useState } from "react";
+import React, { useState } from 'react';
+import ReportCard from './ReportCard';
 
 const questions = [
   {
     category: "HIPAA",
-    text: "Do you store or send PHI using Gmail, Google Drive, Slack, or GoHighLevel?",
-    weight: 2,
+    text: "Do you store or transmit Protected Health Information (PHI)?",
+    followUp: "Do you have a current BAA (Business Associate Agreement) with all vendors?",
   },
   {
-    category: "HIPAA",
-    text: "Do you have signed BAAs with all software vendors handling PHI?",
-    weight: 1,
+    category: "TCPA/CAN-SPAM",
+    text: "Do you use SMS or email marketing?",
+    followUp: "Do you log consent and provide clear opt-out mechanisms?",
   },
   {
-    category: "TCPA",
-    text: "Do you send promotional texts or emails without documented consent?",
-    weight: 2,
-  },
-  {
-    category: "TCPA",
-    text: "Do your emails lack unsubscribe links or footer info?",
-    weight: 1,
+    category: "Scope of Practice",
+    text: "Are any non-licensed individuals involved in patient care or medical advice?",
+    followUp: "Do you have clear written protocols reviewed by a supervising physician?",
   },
   {
     category: "FDA/FTC",
-    text: "Do you market treatments or supplements as 'FDA-approved' when they’re not?",
-    weight: 2,
+    text: "Do you advertise any treatments or supplements?",
+    followUp: "Are those claims backed by published studies or cleared labeling?",
   },
   {
-    category: "FDA/FTC",
-    text: "Do you make medical claims without citations or disclaimers?",
-    weight: 1,
+    category: "AI & Automation",
+    text: "Are you using AI tools for anything customer-facing (chatbots, email, etc.)?",
+    followUp: "Do you have human oversight and disclaimers in place for those AI tools?",
   },
   {
-    category: "Medical Board",
-    text: "Do providers offer services across state lines without multi-state licensure?",
-    weight: 2,
+    category: "Training & SOPs",
+    text: "Does every team member get formal training on compliance, annually?",
+    followUp: "Are SOPs documented and accessible to staff at all times?",
   },
   {
-    category: "Medical Board",
-    text: "Are non-physicians making treatment decisions or diagnoses?",
-    weight: 2,
-  },
-  {
-    category: "AI/Automation",
-    text: "Do you use AI-generated emails, chat, or landing pages without human review?",
-    weight: 1,
-  },
-  {
-    category: "SOPs",
-    text: "Do you have no documented HIPAA training or breach protocol for staff?",
-    weight: 2,
-  },
+    category: "Medical Board Exposure",
+    text: "Are you under active investigation or complaint by a state medical board?",
+    followUp: "Do you have legal counsel or documentation to mitigate this exposure?",
+  }
 ];
 
-const categories = ["HIPAA", "TCPA", "FDA/FTC", "Medical Board", "AI/Automation", "SOPs"];
+export default function IntakeWizard() {
+  const [answers, setAnswers] = useState({});
+  const [showReport, setShowReport] = useState(false);
 
-export default function IntakeWizard({ onComplete }) {
-  const [step, setStep] = useState(0);
-  const [answers, setAnswers] = useState([]);
-
-  const handleAnswer = (risk) => {
-    setAnswers([...answers, risk]);
-    setStep(step + 1);
+  const handleAnswer = (question, value) => {
+    setAnswers(prev => ({ ...prev, [question]: value }));
   };
 
-  if (step >= questions.length) {
-    const categoryScores = {};
-    questions.forEach((q, i) => {
-      if (!categoryScores[q.category]) categoryScores[q.category] = 0;
-      categoryScores[q.category] += answers[i] * q.weight;
-    });
-    onComplete(categoryScores);
-    return null;
+  const handleSubmit = () => {
+    setShowReport(true);
+  };
+
+  if (showReport) {
+    return <ReportCard answers={answers} />;
   }
 
   return (
-    <div className="p-4 text-center max-w-xl mx-auto">
-      <h2 className="text-xl font-semibold mb-4">
-        {questions[step].text}
-      </h2>
-      <div className="flex justify-center gap-4">
-        <button
-          className="bg-red-500 text-white px-4 py-2 rounded"
-          onClick={() => handleAnswer(1)}
-        >
-          Yes
-        </button>
-        <button
-          className="bg-yellow-400 text-black px-4 py-2 rounded"
-          onClick={() => handleAnswer(0.5)}
-        >
-          Not Sure
-        </button>
-        <button
-          className="bg-green-500 text-white px-4 py-2 rounded"
-          onClick={() => handleAnswer(0)}
-        >
-          No
-        </button>
-      </div>
+    <div style={{ padding: 20, maxWidth: 700, margin: '0 auto' }}>
+      <h2>Healthcare Risk Assessment</h2>
+      {questions.map((q, i) => (
+        <div key={i} style={{ marginBottom: 20 }}>
+          <strong>{q.category}:</strong> <br />
+          {q.text}
+          <br />
+          <button onClick={() => handleAnswer(q.category, 1)}>Yes</button>
+          <button onClick={() => handleAnswer(q.category, 0)}>No</button>
+          {answers[q.category] === 1 && (
+            <div style={{ marginTop: 5 }}>
+              <small>{q.followUp}</small><br />
+              <button onClick={() => handleAnswer(`${q.category}_followUp`, 1)}>Yes</button>
+              <button onClick={() => handleAnswer(`${q.category}_followUp`, 0)}>No</button>
+            </div>
+          )}
+        </div>
+      ))}
+      <button onClick={handleSubmit} style={{ marginTop: 30 }}>Generate My Report</button>
     </div>
   );
 }
