@@ -12,29 +12,23 @@ function IntakeWizard({ onComplete }) {
     setBusinessMeta({ businessType, state });
 
     // This will later be replaced by dynamic logic
-    const placeholderQuestions = [
-      {
-        id: 'q1',
-        section: 'Data Collection',
-        description: `Does your ${businessType} collect patient data online in ${state}?`,
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-      },
-      {
-        id: 'q2',
-        section: '3rd-Party Tracking',
-        description: 'Do you use tools like Meta Pixel or Google Analytics on booking or lead forms?',
-        options: [
-          { value: 'yes', label: 'Yes, actively using them' },
-          { value: 'no', label: 'No, none at all' },
-          { value: 'unsure', label: 'I’m not sure' },
-        ],
-      },
-    ];
+    import questionSets from '../data/questionSets';
 
-    setQuestionSet(placeholderQuestions);
+const handleStepOneComplete = ({ businessType, state }) => {
+  // Store the selected business type and state for later use
+  setBusinessMeta({ businessType, state });
+
+  // Try to retrieve the matching question set from the imported questionSets
+  const selectedQuestionSet = questionSets[businessType];
+
+  // If we found matching questions, set them in state; otherwise, show an alert
+  if (selectedQuestionSet && selectedQuestionSet.length > 0) {
+    setQuestionSet(selectedQuestionSet);
+  } else {
+    alert(`No questions found for the selected business type: "${businessType}"`);
+  }
+};
+
   };
 
   const currentQuestion = questionSet[stepIndex];
