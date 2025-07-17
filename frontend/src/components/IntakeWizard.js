@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { getQuestionsForBusiness } from './questionSets';
+import { getQuestionsForBusiness } from '../questionSets';
 import StepOne from './StepOne';
 import ReportCard from './ReportCard';
 
