@@ -133,8 +133,9 @@ const sectionScores = useMemo(() => {
       score,
       totalPoints,
       maxPoints,
-      riskLevel: score <= 2 ? 'low' : score <= 6 ? 'moderate' : 'high'
+      riskLevel: score >= 8 ? 'low' : score >= 4 ? 'moderate' : 'high'
     };
+    
   });
 
   return scores;
@@ -150,7 +151,7 @@ const sectionScores = useMemo(() => {
     return Math.round(average);
   }, [sectionScores]);
 
-  const overallRiskLevel = overallScore <= 2 ? 'low' : overallScore <= 6 ? 'moderate' : 'high';
+  const overallRiskLevel = overallScore >= 8 ? 'low' : overallScore >= 4 ? 'moderate' : 'high';
 
   // Generate recommendations based on answers
   const generateRecommendations = (sectionName, sectionData) => {
@@ -227,7 +228,7 @@ const sectionScores = useMemo(() => {
     const strokeDasharray = `${circumference} ${circumference}`;
     const strokeDashoffset = circumference - (score / 10) * circumference;
     
-    const riskLevel = score <= 2 ? 'low' : score <= 6 ? 'moderate' : 'high';
+    const riskLevel = score >= 8 ? 'low' : score >= 4 ? 'moderate' : 'high';
     const styling = getRiskStyling(riskLevel);
 
     return (
