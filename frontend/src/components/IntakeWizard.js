@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import ReportCard from './ReportCard';
+import questions from './questions'; // ✅ Move it here
 
 function IntakeWizard({ onComplete }) {
   const [stepIndex, setStepIndex] = useState(0);
   const [answers, setAnswers] = useState({});
 
-import questions from './questions';
-const currentQuestion = questions[stepIndex];
+  const currentQuestion = questions[stepIndex];
 
   const handleAnswer = (answer) => {
     const updatedAnswers = { ...answers, [currentQuestion.id]: answer };
