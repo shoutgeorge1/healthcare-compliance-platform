@@ -79,17 +79,22 @@ function IntakeWizard({ onComplete }) {
         <h2 className="text-lg font-semibold">{stepIndex + 1}. {currentQuestion.section}</h2>
         <p className="text-sm text-gray-600">{currentQuestion.description}</p>
       </div>
-
       <div className="space-y-3">
-        {currentQuestion.options.map((opt) => (
-          <button
-            key={opt.value}
-            onClick={() => handleAnswer(opt.value)}
-            className="block w-full text-left px-4 py-2 border rounded hover:bg-blue-50"
-          >
-            {opt.label}
-          </button>
-        ))}
+  {currentQuestion.options.map((opt) => (
+    <label
+      key={opt.value}
+      className="block w-full border rounded px-4 py-2 hover:bg-blue-50 cursor-pointer"
+    >
+      <input
+        type="radio"
+        name={`question-${currentQuestion.id}`}
+        value={opt.value}
+        onChange={() => handleAnswer(opt.value)}
+        className="mr-2"
+      />
+      {opt.label}
+    </label>
+  ))}
       </div>
     </div>
   );
