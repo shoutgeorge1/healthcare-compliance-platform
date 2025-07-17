@@ -1,80 +1,154 @@
 import React, { useState } from 'react';
-import ReportCard from './ReportCard';
 
-const questions = [
-  {
-    category: "HIPAA",
-    text: "Do you store or transmit Protected Health Information (PHI)?",
-    followUp: "Do you have a current BAA (Business Associate Agreement) with all vendors?",
-  },
-  {
-    category: "TCPA/CAN-SPAM",
-    text: "Do you use SMS or email marketing?",
-    followUp: "Do you log consent and provide clear opt-out mechanisms?",
-  },
-  {
-    category: "Scope of Practice",
-    text: "Are any non-licensed individuals involved in patient care or medical advice?",
-    followUp: "Do you have clear written protocols reviewed by a supervising physician?",
-  },
-  {
-    category: "FDA/FTC",
-    text: "Do you advertise any treatments or supplements?",
-    followUp: "Are those claims backed by published studies or cleared labeling?",
-  },
-  {
-    category: "AI & Automation",
-    text: "Are you using AI tools for anything customer-facing (chatbots, email, etc.)?",
-    followUp: "Do you have human oversight and disclaimers in place for those AI tools?",
-  },
-  {
-    category: "Training & SOPs",
-    text: "Does every team member get formal training on compliance, annually?",
-    followUp: "Are SOPs documented and accessible to staff at all times?",
-  },
-  {
-    category: "Medical Board Exposure",
-    text: "Are you under active investigation or complaint by a state medical board?",
-    followUp: "Do you have legal counsel or documentation to mitigate this exposure?",
-  }
-];
+const complianceData = {
+  HIPAA: [
+    "Do you store patient data in a HIPAA-compliant system?",
+    "Do you have BAAs signed with all vendors who handle PHI?",
+    "Is your team trained on HIPAA annually?",
+    "Do you encrypt patient data at rest and in transit?",
+    "Do you have a documented breach response plan?"
+  ],
+  TCPA: [
+    "Do you obtain explicit consent before sending SMS campaigns?",
+    "Are your calls scrubbed against the DNC list?",
+    "Do you have opt-out functionality for SMS and calls?",
+    "Do you retain consent logs for at least 5 years?",
+    "Do you segment marketing vs transactional outreach?"
+  ],
+  FDA: [
+    "Are you marketing unapproved drugs or devices?",
+    "Are your marketing claims supported by scientific evidence?",
+    "Do you properly label all supplements and compounds?",
+    "Do you avoid testimonial ads that mislead consumers?",
+    "Do you have SOPs to avoid off-label promotion?"
+  ],
+  FTC: [
+    "Do your ads disclose typical results?",
+    "Do you include disclaimers for before-and-after photos?",
+    "Is all testimonial content backed by actual experience?",
+    "Do you have marketing approvals logged/documented?",
+    "Do you comply with influencer disclosure rules?"
+  ],
+  MedicalBoard: [
+    "Are providers operating within scope of their license?",
+    "Are supervising physicians involved in daily operations?",
+    "Do you follow your state’s telehealth practice rules?",
+    "Are advanced practice providers properly credentialed?",
+    "Do you maintain current licenses for all providers?"
+  ],
+  SOP_Training: [
+    "Do you provide SOPs to all team members?",
+    "Are staff trained on protocols at least annually?",
+    "Do you document patient education steps?",
+    "Do you have a protocol for handling medical emergencies?",
+    "Is your training tracked and logged?"
+  ],
+  AI_Usage: [
+    "Do you disclose when AI is used in patient interactions?",
+    "Is AI use limited to non-diagnostic support?",
+    "Do you audit your AI content for accuracy?",
+    "Do you avoid AI in regulated clinical decisions?",
+    "Are humans always involved in clinical judgments?"
+  ]
+};
 
-export default function IntakeWizard() {
+const IntakeWizard = () => {
   const [answers, setAnswers] = useState({});
-  const [showReport, setShowReport] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
-  const handleAnswer = (question, value) => {
-    setAnswers(prev => ({ ...prev, [question]: value }));
+  const handleAnswer = (zone, index, value) => {
+    const key = `${zone}-${index}`;
+    setAnswers(prev => ({ ...prev, [key]: value }));
   };
 
-  const handleSubmit = () => {
-    setShowReport(true);
+  const handleSubmit = () => setSubmitted(true);
+
+  const calculateScore = (zone) => {
+    const questions = complianceData[zone];
+    const answeredYes = questions.filter((_, idx) => answers[`${zone}-${idx}`] === 'yes').length;
+    return Math.round((answeredYes / questions.length) * 100);
   };
 
-  if (showReport) {
-    return <ReportCard answers={answers} />;
-  }
+  const getColor = (score) => {
+    if (score >= 80) return 'green';
+    if (score >= 50) return 'orange';
+    return 'red';
+  };
 
   return (
-    <div style={{ padding: 20, maxWidth: 700, margin: '0 auto' }}>
-      <h2>Healthcare Risk Assessment</h2>
-      {questions.map((q, i) => (
-        <div key={i} style={{ marginBottom: 20 }}>
-          <strong>{q.category}:</strong> <br />
-          {q.text}
-          <br />
-          <button onClick={() => handleAnswer(q.category, 1)}>Yes</button>
-          <button onClick={() => handleAnswer(q.category, 0)}>No</button>
-          {answers[q.category] === 1 && (
-            <div style={{ marginTop: 5 }}>
-              <small>{q.followUp}</small><br />
-              <button onClick={() => handleAnswer(`${q.category}_followUp`, 1)}>Yes</button>
-              <button onClick={() => handleAnswer(`${q.category}_followUp`, 0)}>No</button>
+    <div style={{ padding: '2rem', fontFamily: 'Arial, sans-serif' }}>
+      <h1>Healthcare Compliance Risk Assessment</h1>
+
+      {!submitted ? (
+        <>
+          {Object.entries(complianceData).map(([zone, questions]) => (
+            <div key={zone} style={{ marginBottom: '2rem' }}>
+              <h2>{zone.replace(/_/g, ' ')}</h2>
+              {questions.map((question, idx) => (
+                <div key={idx} style={{ marginBottom: '0.5rem' }}>
+                  <p>{question}</p>
+                  <label>
+                    <input
+                      type="radio"
+                      name={`${zone}-${idx}`}
+                      value="yes"
+                      onChange={() => handleAnswer(zone, idx, 'yes')}
+                      checked={answers[`${zone}-${idx}`] === 'yes'}
+                    /> Yes
+                  </label>{' '}
+                  <label>
+                    <input
+                      type="radio"
+                      name={`${zone}-${idx}`}
+                      value="no"
+                      onChange={() => handleAnswer(zone, idx, 'no')}
+                      checked={answers[`${zone}-${idx}`] === 'no'}
+                    /> No
+                  </label>
+                </div>
+              ))}
             </div>
-          )}
-        </div>
-      ))}
-      <button onClick={handleSubmit} style={{ marginTop: 30 }}>Generate My Report</button>
+          ))}
+
+          <button onClick={handleSubmit} style={{ padding: '10px 20px', fontSize: '16px' }}>
+            View Risk Report
+          </button>
+        </>
+      ) : (
+        <>
+          <h2>📊 Risk Report Card</h2>
+          {Object.keys(complianceData).map((zone) => {
+            const score = calculateScore(zone);
+            const color = getColor(score);
+            return (
+              <div key={zone} style={{ marginBottom: '1rem' }}>
+                <strong>{zone.replace(/_/g, ' ')}:</strong>
+                <div
+                  style={{
+                    width: '100%',
+                    background: '#eee',
+                    height: '20px',
+                    borderRadius: '5px',
+                    marginTop: '5px',
+                    overflow: 'hidden'
+                  }}
+                >
+                  <div
+                    style={{
+                      width: `${score}%`,
+                      background: color,
+                      height: '100%'
+                    }}
+                  />
+                </div>
+                <p style={{ color }}>{score}% compliant</p>
+              </div>
+            );
+          })}
+        </>
+      )}
     </div>
   );
-}
+};
+
+export default IntakeWizard;
