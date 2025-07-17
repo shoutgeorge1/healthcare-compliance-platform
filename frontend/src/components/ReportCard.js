@@ -14,7 +14,8 @@ import {
   XCircle,
   AlertCircle
 } from 'lucide-react';
-import { getQuestionsForBusiness } from './questionSets';
+import { getQuestionsForBusiness } from '../questionSets';
+
 
 
 // Sample data - replace with props in real implementation
