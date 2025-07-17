@@ -1,57 +1,6 @@
 import React, { useState } from 'react';
 import ReportCard from './ReportCard';
-
-const complianceData = {
-  HIPAA: [
-    "Do you store patient data in a HIPAA-compliant system?",
-    "Do you have BAAs signed with all vendors who handle PHI?",
-    "Is your team trained on HIPAA annually?",
-    "Do you encrypt patient data at rest and in transit?",
-    "Do you have a documented breach response plan?"
-  ],
-  TCPA: [
-    "Do you obtain explicit consent before sending SMS campaigns?",
-    "Are your calls scrubbed against the DNC list?",
-    "Do you have opt-out functionality for SMS and calls?",
-    "Do you retain consent logs for at least 5 years?",
-    "Do you segment marketing vs transactional outreach?"
-  ],
-  FDA: [
-    "Are you marketing unapproved drugs or devices?",
-    "Are your marketing claims supported by scientific evidence?",
-    "Do you properly label all supplements and compounds?",
-    "Do you avoid testimonial ads that mislead consumers?",
-    "Do you have SOPs to avoid off-label promotion?"
-  ],
-  FTC: [
-    "Do your ads disclose typical results?",
-    "Do you include disclaimers for before-and-after photos?",
-    "Is all testimonial content backed by actual experience?",
-    "Do you have marketing approvals logged/documented?",
-    "Do you comply with influencer disclosure rules?"
-  ],
-  MedicalBoard: [
-    "Are providers operating within scope of their license?",
-    "Are supervising physicians involved in daily operations?",
-    "Do you follow your state's telehealth practice rules?",
-    "Are advanced practice providers properly credentialed?",
-    "Do you maintain current licenses for all providers?"
-  ],
-  SOP_Training: [
-    "Do you provide SOPs to all team members?",
-    "Are staff trained on protocols at least annually?",
-    "Do you document patient education steps?",
-    "Do you have a protocol for handling medical emergencies?",
-    "Is your training tracked and logged?"
-  ],
-  AI_Usage: [
-    "Do you disclose when AI is used in patient interactions?",
-    "Is AI use limited to non-diagnostic support?",
-    "Do you audit your AI content for accuracy?",
-    "Do you avoid AI in regulated clinical decisions?",
-    "Are humans always involved in clinical judgments?"
-  ]
-};
+import { getQuestionsForBusiness } from '../questionSets';
 
 const businessTypes = [
   "Clinical care (in-person or virtual)",
@@ -61,13 +10,26 @@ const businessTypes = [
 ];
 
 const IntakeWizard = () => {
+  const [currentStep, setCurrentStep] = useState(1);
   const [answers, setAnswers] = useState({});
   const [businessType, setBusinessType] = useState('');
+  const [state, setState] = useState('');
   const [showReportCard, setShowReportCard] = useState(false);
+  const [questions, setQuestions] = useState([]);
 
-  const handleAnswer = (zone, index, value) => {
-    const key = `${zone}-${index}`;
-    setAnswers(prev => ({ ...prev, [key]: value }));
+  // Handle business type selection and load dynamic questions
+  const handleBusinessTypeSelection = (selectedType, selectedState) => {
+    setBusinessType(selectedType);
+    setState(selectedState);
+    
+    // Get filtered questions for this business type
+    const filteredQuestions = getQuestionsForBusiness(selectedType, selectedState);
+    setQuestions(filteredQuestions);
+    setCurrentStep(2);
+  };
+
+  const handleAnswer = (questionId, value) => {
+    setAnswers(prev => ({ ...prev, [questionId]: value }));
   };
 
   const handleSubmit = () => {
@@ -76,8 +38,11 @@ const IntakeWizard = () => {
 
   const handleRestartAssessment = () => {
     setShowReportCard(false);
+    setCurrentStep(1);
     setAnswers({});
     setBusinessType('');
+    setState('');
+    setQuestions([]);
   };
 
   // Show ReportCard if assessment is complete
@@ -100,106 +65,200 @@ const IntakeWizard = () => {
     );
   }
 
-  // Show the assessment form
-  return (
-    <div className="max-w-4xl mx-auto p-6 bg-white">
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Healthcare Compliance Risk Assessment
-        </h1>
-        <p className="text-gray-600">
-          Complete this assessment to identify compliance risks and get actionable recommendations
-        </p>
-      </div>
-
-      {/* Business Type Selection */}
-      <div className="mb-8 p-6 bg-gray-50 rounded-lg">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">
-          What type of business do you operate?
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {businessTypes.map((type) => (
-            <label key={type} className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-white transition-colors">
-              <input
-                type="radio"
-                name="businessType"
-                value={type}
-                checked={businessType === type}
-                onChange={(e) => setBusinessType(e.target.value)}
-                className="mr-3"
-              />
-              <span className="text-gray-700">{type}</span>
-            </label>
-          ))}
+  // Step 1: Business Type and State Selection
+  if (currentStep === 1) {
+    return (
+      <div className="max-w-4xl mx-auto p-6 bg-white min-h-screen">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Healthcare Compliance Risk Assessment
+          </h1>
+          <p className="text-gray-600">
+            Get personalized compliance insights for your healthcare business
+          </p>
         </div>
-      </div>
 
-      {/* Compliance Questions */}
-      {Object.entries(complianceData).map(([zone, questions]) => (
-        <div key={zone} className="mb-8 p-6 border border-gray-200 rounded-lg">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">
-            {zone.replace(/_/g, ' ')}
-          </h2>
-          <div className="space-y-4">
-            {questions.map((question, idx) => (
-              <div key={idx} className="p-4 bg-gray-50 rounded-lg">
-                <p className="text-gray-800 mb-3 font-medium">{question}</p>
-                <div className="flex space-x-6">
-                  <label className="flex items-center cursor-pointer">
-                    <input
-                      type="radio"
-                      name={`${zone}-${idx}`}
-                      value="yes"
-                      onChange={() => handleAnswer(zone, idx, 'yes')}
-                      checked={answers[`${zone}-${idx}`] === 'yes'}
-                      className="mr-2"
-                    />
-                    <span className="text-gray-700">Yes</span>
-                  </label>
-                  <label className="flex items-center cursor-pointer">
-                    <input
-                      type="radio"
-                      name={`${zone}-${idx}`}
-                      value="no"
-                      onChange={() => handleAnswer(zone, idx, 'no')}
-                      checked={answers[`${zone}-${idx}`] === 'no'}
-                      className="mr-2"
-                    />
-                    <span className="text-gray-700">No</span>
-                  </label>
-                  <label className="flex items-center cursor-pointer">
-                    <input
-                      type="radio"
-                      name={`${zone}-${idx}`}
-                      value="unsure"
-                      onChange={() => handleAnswer(zone, idx, 'unsure')}
-                      checked={answers[`${zone}-${idx}`] === 'unsure'}
-                      className="mr-2"
-                    />
-                    <span className="text-gray-700">Not Sure</span>
-                  </label>
-                </div>
-              </div>
-            ))}
+        <div className="bg-white rounded-xl shadow-lg p-8 max-w-2xl mx-auto">
+          {/* Business Type Selection */}
+          <div className="mb-8">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+              What type of business do you operate?
+            </h2>
+            <div className="grid grid-cols-1 gap-3">
+              {businessTypes.map((type) => (
+                <label key={type} className="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-300 hover:bg-blue-50 transition-all">
+                  <input
+                    type="radio"
+                    name="businessType"
+                    value={type}
+                    checked={businessType === type}
+                    onChange={(e) => setBusinessType(e.target.value)}
+                    className="mr-4 w-4 h-4 text-blue-600"
+                  />
+                  <span className="text-gray-700 font-medium">{type}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* State Selection */}
+          <div className="mb-8">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+              Which U.S. state(s) do you operate in?
+            </h2>
+            <select
+              value={state}
+              onChange={(e) => setState(e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="">-- Select a state --</option>
+              <option value="California">California</option>
+              <option value="New York">New York</option>
+              <option value="Texas">Texas</option>
+              <option value="Florida">Florida</option>
+              <option value="Illinois">Illinois</option>
+              <option value="Pennsylvania">Pennsylvania</option>
+              <option value="Ohio">Ohio</option>
+              <option value="Georgia">Georgia</option>
+              <option value="North Carolina">North Carolina</option>
+              <option value="Michigan">Michigan</option>
+              <option value="Other">Other</option>
+            </select>
+            <p className="text-sm text-gray-500 mt-2">
+              Some states like California have stricter compliance rules
+            </p>
+          </div>
+
+          {/* Continue Button */}
+          <div className="text-center">
+            <button 
+              onClick={() => handleBusinessTypeSelection(businessType, state)}
+              disabled={!businessType || !state}
+              className="px-8 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors text-lg font-medium w-full"
+            >
+              Start Risk Assessment →
+            </button>
           </div>
         </div>
-      ))}
-
-      {/* Submit Button */}
-      <div className="text-center mt-8">
-        <button 
-          onClick={handleSubmit}
-          disabled={!businessType}
-          className="px-8 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors text-lg font-medium"
-        >
-          Generate Risk Report
-        </button>
-        {!businessType && (
-          <p className="text-red-500 text-sm mt-2">Please select your business type to continue</p>
-        )}
       </div>
-    </div>
-  );
+    );
+  }
+
+  // Step 2: Dynamic Questions Based on Business Type
+  if (currentStep === 2) {
+    return (
+      <div className="max-w-4xl mx-auto p-6 bg-white min-h-screen">
+        <div className="text-center mb-8">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            {businessType} Compliance Assessment
+          </h1>
+          <p className="text-gray-600">
+            Answer these questions specific to your business type
+          </p>
+          <div className="bg-blue-50 rounded-lg p-3 mt-4 inline-block">
+            <span className="text-blue-800 font-medium">
+              {Object.keys(answers).length} of {questions.length} questions answered
+            </span>
+          </div>
+        </div>
+
+        {/* Dynamic Questions */}
+        <div className="space-y-6">
+          {questions.map((question, index) => {
+            // Check if this question depends on another answer
+            if (question.dependsOn) {
+              const dependentAnswer = answers[question.dependsOn.questionId];
+              const requiredValues = Array.isArray(question.dependsOn.values) 
+                ? question.dependsOn.values 
+                : [question.dependsOn.value];
+              
+              if (!requiredValues.includes(dependentAnswer)) {
+                return null; // Don't show this question
+              }
+            }
+
+            return (
+              <div key={question.id} className="bg-white rounded-xl shadow-md p-6 border-l-4 border-blue-500">
+                <div className="mb-4">
+                  <span className="inline-block bg-gray-100 text-gray-600 text-xs font-medium px-2 py-1 rounded">
+                    {question.section}
+                  </span>
+                  {question.riskLevel && (
+                    <span className={`inline-block ml-2 text-xs font-medium px-2 py-1 rounded ${
+                      question.riskLevel === 'critical' ? 'bg-red-100 text-red-700' :
+                      question.riskLevel === 'high' ? 'bg-orange-100 text-orange-700' :
+                      question.riskLevel === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                      'bg-green-100 text-green-700'
+                    }`}>
+                      {question.riskLevel.toUpperCase()} RISK
+                    </span>
+                  )}
+                </div>
+                
+                <h3 className="text-lg font-medium text-gray-900 mb-4">
+                  {question.description}
+                </h3>
+                
+                <div className={`${question.multiSelect ? 'space-y-2' : 'flex flex-wrap gap-4'}`}>
+                  {question.options.map((option) => (
+                    <label key={option.value} className={`${
+                      question.multiSelect 
+                        ? 'flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50' 
+                        : 'flex items-center cursor-pointer'
+                    }`}>
+                      <input
+                        type={question.multiSelect ? "checkbox" : "radio"}
+                        name={question.id}
+                        value={option.value}
+                        checked={
+                          question.multiSelect 
+                            ? (answers[question.id] || []).includes(option.value)
+                            : answers[question.id] === option.value
+                        }
+                        onChange={(e) => {
+                          if (question.multiSelect) {
+                            const currentValues = answers[question.id] || [];
+                            const newValues = e.target.checked
+                              ? [...currentValues, option.value]
+                              : currentValues.filter(v => v !== option.value);
+                            handleAnswer(question.id, newValues);
+                          } else {
+                            handleAnswer(question.id, option.value);
+                          }
+                        }}
+                        className="mr-3 w-4 h-4 text-blue-600"
+                      />
+                      <span className="text-gray-700">{option.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Navigation */}
+        <div className="flex justify-between items-center mt-8 p-6 bg-gray-50 rounded-lg">
+          <button
+            onClick={() => setCurrentStep(1)}
+            className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors"
+          >
+            ← Back to Business Type
+          </button>
+          
+          <button 
+            onClick={handleSubmit}
+            disabled={Object.keys(answers).length === 0}
+            className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium"
+          >
+            Generate Risk Report →
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return null;
 };
 
 export default IntakeWizard;
