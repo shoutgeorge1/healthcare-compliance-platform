@@ -14,6 +14,8 @@ import {
   XCircle,
   AlertCircle
 } from 'lucide-react';
+import { getQuestionsForBusiness } from './questionSets';
+
 
 // Sample data - replace with props in real implementation
 const sampleAnswers = {
@@ -82,35 +84,61 @@ const ReportCard = ({ answers = sampleAnswers, businessType = "Clinical care (in
     }
   };
 
-  // Calculate scores for each section
-  const sectionScores = useMemo(() => {
-    const scores = {};
-    
-    Object.entries(sections).forEach(([sectionName, sectionData]) => {
-      let totalPoints = 0;
-      let maxPoints = 0;
-      
-      sectionData.questions.forEach(questionId => {
-        if (answers[questionId]) {
-          maxPoints += 2; // Max possible points per question
-          if (answers[questionId] === 'yes') totalPoints += 3;
-          else if (answers[questionId] === 'unsure') totalPoints += 2;
-          // 'no' = 0 points
+const riskWeights = {
+  critical: 4,
+  high: 3,
+  medium: 2,
+  low: 1
+};
+
+const sectionScores = useMemo(() => {
+  const scores = {};
+  const allQuestions = getQuestionsForBusiness(businessType); // Get actual questions
+  const questionMap = {};
+  allQuestions.forEach(q => {
+    questionMap[q.id] = q;
+  });
+
+  Object.entries(sections).forEach(([sectionName, sectionData]) => {
+    let totalPoints = 0;
+    let maxPoints = 0;
+
+    sectionData.questions.forEach(questionId => {
+      const answer = answers[questionId];
+      const question = questionMap[questionId];
+
+      if (question && answer) {
+        const weight = riskWeights[question.riskLevel] || 1;
+        maxPoints += weight;
+
+        if (Array.isArray(answer)) {
+          totalPoints += weight * 0.75; // generous multi-select partial credit
+        } else if (
+          ['yes', 'yes_both', 'yes_automated', 'yes_controlled', 'yes_clinical', 'yes_peer_reviewed'].includes(answer)
+        ) {
+          totalPoints += weight * 1.25; // super-boost for yes answers
+        } else if (answer === 'unsure') {
+          totalPoints += weight * 0.75; // softer penalty
         }
-      });
-      
-      // Convert to 0-10 scale
-      const score = maxPoints > 0 ? Math.round((totalPoints / maxPoints) * 10) : 0;
-      scores[sectionName] = {
-        score,
-        totalPoints,
-        maxPoints,
-        riskLevel: score <= 2 ? 'low' : score <= 6 ? 'moderate' : 'high'
-      };
+        
+        // else (e.g., 'no') = 0
+      }
     });
-    
-    return scores;
-  }, [answers]);
+
+    const score = maxPoints > 0 ? Math.min(10, Math.round((totalPoints / maxPoints) * 10)) : 0;
+
+
+    scores[sectionName] = {
+      score,
+      totalPoints,
+      maxPoints,
+      riskLevel: score <= 2 ? 'low' : score <= 6 ? 'moderate' : 'high'
+    };
+  });
+
+  return scores;
+}, [answers, businessType]);
+
 
   // Calculate overall score
   const overallScore = useMemo(() => {
