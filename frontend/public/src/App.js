@@ -1,25 +1,18 @@
-import React, { useState } from 'react';
-import IntakeWizard from './components/IntakeWizard';
+// src/App.js
+import React, { useState } from "react";
+import IntakeWizard from "./components/IntakeWizard";
+import ReportCard from "./components/ReportCard";
 
 function App() {
-  const [completedAssessment, setCompletedAssessment] = useState(null);
-
-  const handleAssessmentComplete = (assessmentData) => {
-    setCompletedAssessment(assessmentData);
-    alert('Assessment Complete! Risk Score: ' + assessmentData.overallScore + '/100');
-  };
+  const [scores, setScores] = useState(null);
 
   return (
-    <div className="App">
-      <nav className="bg-blue-600 text-white p-4">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-xl font-bold">Healthcare Compliance Platform</h1>
-        </div>
-      </nav>
-      
-      <main>
-        <IntakeWizard onComplete={handleAssessmentComplete} />
-      </main>
+    <div className="min-h-screen bg-gray-100 text-black">
+      {!scores ? (
+        <IntakeWizard onComplete={(s) => setScores(s)} />
+      ) : (
+        <ReportCard scores={scores} />
+      )}
     </div>
   );
 }
