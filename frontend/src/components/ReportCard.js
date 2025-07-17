@@ -93,8 +93,8 @@ const ReportCard = ({ answers = sampleAnswers, businessType = "Clinical care (in
       sectionData.questions.forEach(questionId => {
         if (answers[questionId]) {
           maxPoints += 2; // Max possible points per question
-          if (answers[questionId] === 'yes') totalPoints += 2;
-          else if (answers[questionId] === 'unsure') totalPoints += 1;
+          if (answers[questionId] === 'yes') totalPoints += 1;
+          else if (answers[questionId] === 'unsure') totalPoints += 0;
           // 'no' = 0 points
         }
       });
