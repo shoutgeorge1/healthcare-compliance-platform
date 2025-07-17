@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import questions from './questions';
 import ReportCard from './ReportCard';
 
 function IntakeWizard({ onComplete }) {
