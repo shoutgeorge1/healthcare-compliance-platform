@@ -11,11 +11,11 @@ export function getQuestionsForBusiness(businessType, state) {
             { value: "no", label: "No" }
           ],
           riskLevel: "high",
-          followUp: "hipaa1_followup"
+          questionType: "risk" // "no" is better for compliance
         },
         {
           id: "hipaa1_followup",
-          section: "HIPAA Risk Assessment",
+          section: "HIPAA Risk Assessment", 
           description: "What type of information do you collect on these forms?",
           dependsOn: { questionId: "hipaa1", value: "yes" },
           options: [
@@ -25,7 +25,8 @@ export function getQuestionsForBusiness(businessType, state) {
             { value: "full_phi", label: "Comprehensive health information" }
           ],
           multiSelect: true,
-          riskLevel: "high"
+          riskLevel: "high",
+          questionType: "risk"
         },
         {
           id: "hipaa2",
@@ -37,7 +38,8 @@ export function getQuestionsForBusiness(businessType, state) {
             { value: "no", label: "No EHR system" },
             { value: "unsure", label: "I'm not sure" }
           ],
-          riskLevel: "critical"
+          riskLevel: "critical",
+          questionType: "compliance" // "yes_baa" is best for compliance
         },
         {
           id: "hipaa3",
@@ -50,10 +52,11 @@ export function getQuestionsForBusiness(businessType, state) {
             { value: "unsecured_platforms", label: "Social media or other unsecured platforms" },
             { value: "mixed", label: "Combination of methods" }
           ],
-          riskLevel: "critical"
+          riskLevel: "critical",
+          questionType: "compliance" // "encrypted_secure" is best
         },
         
-        // 3rd-Party Tracking Section
+        // 3rd-Party Tracking Section  
         {
           id: "tracking1",
           section: "3rd-Party Tracking & Data Privacy",
@@ -64,7 +67,8 @@ export function getQuestionsForBusiness(businessType, state) {
             { value: "unsure", label: "I'm not sure" },
             { value: "some_pages", label: "Only on certain pages (not intake forms)" }
           ],
-          riskLevel: "high"
+          riskLevel: "high",
+          questionType: "risk" // "no_none" is best for compliance
         },
         {
           id: "tracking2",
@@ -76,12 +80,13 @@ export function getQuestionsForBusiness(businessType, state) {
             { value: "no", label: "No privacy policy" },
             { value: "unsure", label: "I'm not sure" }
           ],
-          riskLevel: "medium"
+          riskLevel: "medium",
+          questionType: "compliance" // "yes_comprehensive" is best
         },
         
         // TCPA / SMS Risk Section
         {
-          id: "sms1",
+          id: "sms1", 
           section: "TCPA / SMS Compliance",
           description: "Do you send text messages to patients after they fill out an online form?",
           options: [
@@ -91,11 +96,12 @@ export function getQuestionsForBusiness(businessType, state) {
             { value: "no", label: "No" },
             { value: "unsure", label: "I'm not sure" }
           ],
-          riskLevel: "high"
+          riskLevel: "high",
+          questionType: "risk" // "no" is safest for compliance
         },
         {
           id: "sms2",
-          section: "TCPA / SMS Compliance",
+          section: "TCPA / SMS Compliance", 
           description: "How do you obtain consent for text messaging?",
           dependsOn: { questionId: "sms1", values: ["yes_automated", "yes_appointment", "yes_both"] },
           options: [
@@ -105,7 +111,8 @@ export function getQuestionsForBusiness(businessType, state) {
             { value: "no_consent", label: "No specific consent process" },
             { value: "unsure", label: "I'm not sure" }
           ],
-          riskLevel: "critical"
+          riskLevel: "critical",
+          questionType: "compliance" // "explicit_checkbox" is best
         },
         
         // Email Marketing / CAN-SPAM Section
@@ -119,7 +126,8 @@ export function getQuestionsForBusiness(businessType, state) {
             { value: "appointment_only", label: "Only appointment-related emails" },
             { value: "no", label: "No marketing emails" }
           ],
-          riskLevel: "medium"
+          riskLevel: "medium",
+          questionType: "risk" // "no" or "appointment_only" are safer
         },
         {
           id: "email2",
@@ -132,7 +140,8 @@ export function getQuestionsForBusiness(businessType, state) {
             { value: "no", label: "No formal compliance measures" },
             { value: "unsure", label: "I'm not sure" }
           ],
-          riskLevel: "medium"
+          riskLevel: "medium",
+          questionType: "compliance" // "yes_compliant" is best
         },
         
         // Telehealth Licensing Section
@@ -146,7 +155,8 @@ export function getQuestionsForBusiness(businessType, state) {
             { value: "no_single", label: "No, single state only" },
             { value: "unsure", label: "I'm not sure" }
           ],
-          riskLevel: "high"
+          riskLevel: "high",
+          questionType: "risk" // "no_single" is simplest for compliance
         },
         {
           id: "telehealth2",
@@ -159,7 +169,8 @@ export function getQuestionsForBusiness(businessType, state) {
             { value: "home_state_only", label: "Only licensed in home state" },
             { value: "unsure", label: "I'm not sure about requirements" }
           ],
-          riskLevel: "critical"
+          riskLevel: "critical",
+          questionType: "compliance" // "yes_all" is required for compliance
         },
         
         // Health Claims (FTC) Section
@@ -173,7 +184,8 @@ export function getQuestionsForBusiness(businessType, state) {
             { value: "no_claims", label: "No health claims" },
             { value: "unsure", label: "I'm not sure" }
           ],
-          riskLevel: "medium"
+          riskLevel: "medium",
+          questionType: "risk" // "no_claims" is safest
         },
         {
           id: "claims2",
@@ -187,7 +199,8 @@ export function getQuestionsForBusiness(businessType, state) {
             { value: "no_evidence", label: "No formal evidence" },
             { value: "unsure", label: "I'm not sure" }
           ],
-          riskLevel: "high"
+          riskLevel: "high",
+          questionType: "compliance" // "yes_clinical" or "yes_peer_reviewed" best
         },
         
         // Scope of Practice Section
@@ -204,7 +217,8 @@ export function getQuestionsForBusiness(businessType, state) {
             { value: "other", label: "Other licensed professional" },
             { value: "unlicensed", label: "Not a licensed healthcare provider" }
           ],
-          riskLevel: "critical"
+          riskLevel: "critical",
+          questionType: "compliance" // Licensed providers are better for compliance
         },
         {
           id: "scope2",
@@ -216,7 +230,8 @@ export function getQuestionsForBusiness(businessType, state) {
             { value: "yes_devices", label: "Yes, medical devices only" },
             { value: "no", label: "No prescribing authority" }
           ],
-          riskLevel: "high"
+          riskLevel: "high",
+          questionType: "neutral" // Depends on scope of practice
         },
         
         // State-Specific Compliance
@@ -230,7 +245,8 @@ export function getQuestionsForBusiness(businessType, state) {
             { value: "no_awareness", label: "No, not aware of state-specific rules" },
             { value: "unsure", label: "I'm not sure" }
           ],
-          riskLevel: state === "California" || state === "New York" || state === "Texas" ? "high" : "medium"
+          riskLevel: state === "California" || state === "New York" || state === "Texas" ? "high" : "medium",
+          questionType: "compliance" // "yes_compliant" is best
         }
       ],
       
@@ -247,7 +263,8 @@ export function getQuestionsForBusiness(businessType, state) {
             { value: "yes_multiple", label: "Yes, multiple types of claims" },
             { value: "no", label: "No health claims" }
           ],
-          riskLevel: "high"
+          riskLevel: "high",
+          questionType: "risk" // "no" is safest
         },
         {
           id: "ftc2",
@@ -259,7 +276,8 @@ export function getQuestionsForBusiness(businessType, state) {
             { value: "yes_testimonials_only", label: "Yes, testimonials only" },
             { value: "no", label: "No before/after content" }
           ],
-          riskLevel: "medium"
+          riskLevel: "medium",
+          questionType: "risk" // "no" is safest
         },
         {
           id: "ftc3",
@@ -272,33 +290,8 @@ export function getQuestionsForBusiness(businessType, state) {
             { value: "no", label: "No disclaimers" },
             { value: "unsure", label: "I'm not sure" }
           ],
-          riskLevel: "high"
-        },
-        
-        // 3rd-Party Tracking Section
-        {
-          id: "tracking2",
-          section: "3rd-Party Tracking & Data Privacy",
-          description: "Do you use Facebook Pixel, Google Analytics, or other tracking on your website?",
-          options: [
-            { value: "yes_extensive", label: "Yes, extensive tracking setup" },
-            { value: "yes_basic", label: "Yes, basic analytics only" },
-            { value: "no", label: "No tracking tools" },
-            { value: "unsure", label: "I'm not sure" }
-          ],
-          riskLevel: "medium"
-        },
-        {
-          id: "tracking3",
-          section: "3rd-Party Tracking & Data Privacy",
-          description: "Do you collect personal information through online forms?",
-          options: [
-            { value: "yes_extensive", label: "Yes, detailed personal information" },
-            { value: "yes_basic", label: "Yes, basic contact information" },
-            { value: "consultation_only", label: "Only for consultations" },
-            { value: "no", label: "No online forms" }
-          ],
-          riskLevel: "low"
+          riskLevel: "high",
+          questionType: "compliance" // "yes_prominent" is best
         },
         
         // Professional Licensing Section
@@ -312,7 +305,8 @@ export function getQuestionsForBusiness(businessType, state) {
             { value: "certified_wellness", label: "Certified wellness professional" },
             { value: "unlicensed", label: "No professional license" }
           ],
-          riskLevel: "medium"
+          riskLevel: "medium",
+          questionType: "compliance" // Licensed is better
         },
         {
           id: "licensing2",
@@ -324,35 +318,8 @@ export function getQuestionsForBusiness(businessType, state) {
             { value: "no", label: "No credential display" },
             { value: "not_applicable", label: "Not applicable (unlicensed)" }
           ],
-          riskLevel: "medium"
-        },
-        
-        // Marketing Claims Section
-        {
-          id: "marketing1",
-          section: "Marketing Claims & Pricing",
-          description: "Do you advertise specific pricing or promotional offers?",
-          options: [
-            { value: "yes_specific", label: "Yes, specific prices listed" },
-            { value: "yes_promotions", label: "Yes, promotional offers" },
-            { value: "yes_both", label: "Yes, both pricing and promotions" },
-            { value: "consultation_based", label: "Consultation-based pricing only" },
-            { value: "no", label: "No pricing information" }
-          ],
-          riskLevel: "low"
-        },
-        {
-          id: "marketing2",
-          section: "Marketing Claims & Pricing",
-          description: "Do you include all required terms and conditions for promotions?",
-          dependsOn: { questionId: "marketing1", values: ["yes_promotions", "yes_both"] },
-          options: [
-            { value: "yes_clear", label: "Yes, clear terms and conditions" },
-            { value: "yes_fine_print", label: "Yes, in fine print" },
-            { value: "partial", label: "Some terms included" },
-            { value: "no", label: "No terms and conditions" }
-          ],
-          riskLevel: "medium"
+          riskLevel: "medium",
+          questionType: "compliance" // "yes_prominent" is best
         },
         
         // SMS/Email Marketing Section
@@ -367,7 +334,8 @@ export function getQuestionsForBusiness(businessType, state) {
             { value: "appointment_only", label: "Appointment reminders only" },
             { value: "no", label: "No marketing messages" }
           ],
-          riskLevel: "medium"
+          riskLevel: "medium",
+          questionType: "risk" // "no" or "appointment_only" are safer
         },
         {
           id: "communication2",
@@ -380,7 +348,8 @@ export function getQuestionsForBusiness(businessType, state) {
             { value: "implied_consent", label: "Implied through service use" },
             { value: "no_formal_consent", label: "No formal consent process" }
           ],
-          riskLevel: "high"
+          riskLevel: "high",
+          questionType: "compliance" // "explicit_opt_in" is best
         }
       ],
       
@@ -398,7 +367,8 @@ export function getQuestionsForBusiness(businessType, state) {
             { value: "no_cosmetic", label: "No, cosmetic products" },
             { value: "unsure", label: "I'm not sure" }
           ],
-          riskLevel: "critical"
+          riskLevel: "critical",
+          questionType: "neutral" // Classification itself doesn't indicate compliance
         },
         {
           id: "fda2",
@@ -411,7 +381,8 @@ export function getQuestionsForBusiness(businessType, state) {
             { value: "no_unregistered", label: "No, products not registered" },
             { value: "unsure", label: "I'm not sure" }
           ],
-          riskLevel: "critical"
+          riskLevel: "critical",
+          questionType: "compliance" // "yes_all_current" is required
         },
         {
           id: "fda3",
@@ -425,10 +396,11 @@ export function getQuestionsForBusiness(businessType, state) {
             { value: "third_party", label: "Third-party manufacturer handles this" },
             { value: "unsure", label: "I'm not sure" }
           ],
-          riskLevel: "high"
+          riskLevel: "high",
+          questionType: "compliance" // "yes_certified" is best
         },
         
-        // Product Claims Section
+        // Product Claims Section  
         {
           id: "claims1",
           section: "Product Claims & Labeling",
@@ -439,7 +411,8 @@ export function getQuestionsForBusiness(businessType, state) {
             { value: "yes_structure_function", label: "Yes, structure/function claims only" },
             { value: "no", label: "No health claims" }
           ],
-          riskLevel: "high"
+          riskLevel: "high",
+          questionType: "risk" // "no" is safest
         },
         {
           id: "claims2",
@@ -453,20 +426,8 @@ export function getQuestionsForBusiness(businessType, state) {
             { value: "limited", label: "Limited evidence" },
             { value: "no", label: "No formal evidence" }
           ],
-          riskLevel: "critical"
-        },
-        {
-          id: "claims3",
-          section: "Product Claims & Labeling",
-          description: "Do your supplement labels include the required FDA disclaimer?",
-          dependsOn: { questionId: "fda1", value: "no_supplements" },
-          options: [
-            { value: "yes_compliant", label: "Yes, proper FDA disclaimer" },
-            { value: "yes_modified", label: "Yes, but modified version" },
-            { value: "no", label: "No FDA disclaimer" },
-            { value: "unsure", label: "I'm not sure" }
-          ],
-          riskLevel: "high"
+          riskLevel: "critical",
+          questionType: "compliance" // "yes_clinical_trials" or "yes_peer_reviewed" best
         },
         
         // Manufacturing & Quality Section
@@ -481,7 +442,8 @@ export function getQuestionsForBusiness(businessType, state) {
             { value: "international_unknown", label: "International, unknown standards" },
             { value: "third_party", label: "Third-party manufacturer" }
           ],
-          riskLevel: "medium"
+          riskLevel: "medium",
+          questionType: "compliance" // "usa_fda_registered" is best
         },
         {
           id: "manufacturing2",
@@ -494,61 +456,8 @@ export function getQuestionsForBusiness(businessType, state) {
             { value: "no", label: "No third-party testing" },
             { value: "unsure", label: "I'm not sure" }
           ],
-          riskLevel: "medium"
-        },
-        
-        // E-commerce & Sales Section
-        {
-          id: "ecommerce1",
-          section: "E-commerce & Sales Compliance",
-          description: "How do you sell your products?",
-          options: [
-            { value: "direct_online", label: "Direct online sales" },
-            { value: "retail_stores", label: "Through retail stores" },
-            { value: "healthcare_providers", label: "Through healthcare providers" },
-            { value: "multiple_channels", label: "Multiple sales channels" },
-            { value: "wholesale_only", label: "Wholesale only" }
-          ],
-          riskLevel: "low"
-        },
-        {
-          id: "ecommerce2",
-          section: "E-commerce & Sales Compliance",
-          description: "Do you have clear return and refund policies?",
-          dependsOn: { questionId: "ecommerce1", values: ["direct_online", "multiple_channels"] },
-          options: [
-            { value: "yes_comprehensive", label: "Yes, comprehensive policies" },
-            { value: "yes_basic", label: "Yes, basic policies" },
-            { value: "no_returns", label: "No returns accepted" },
-            { value: "no_policy", label: "No formal policy" }
-          ],
-          riskLevel: "low"
-        },
-        
-        // International Compliance Section
-        {
-          id: "international1",
-          section: "International & Import Compliance",
-          description: "Do you import products or ingredients from other countries?",
-          options: [
-            { value: "yes_fda_registered", label: "Yes, through FDA-registered importers" },
-            { value: "yes_direct", label: "Yes, direct imports" },
-            { value: "domestic_only", label: "Domestic sourcing only" },
-            { value: "unsure", label: "I'm not sure" }
-          ],
-          riskLevel: "medium"
-        },
-        {
-          id: "international2",
-          section: "International & Import Compliance",
-          description: "Do you sell products internationally?",
-          options: [
-            { value: "yes_compliant", label: "Yes, compliant with foreign regulations" },
-            { value: "yes_limited", label: "Yes, limited international sales" },
-            { value: "domestic_only", label: "Domestic sales only" },
-            { value: "unsure", label: "I'm not sure about compliance" }
-          ],
-          riskLevel: "low"
+          riskLevel: "medium",
+          questionType: "compliance" // "yes_every_batch" is best
         }
       ],
       
@@ -565,7 +474,8 @@ export function getQuestionsForBusiness(businessType, state) {
             { value: "no", label: "No PHI handling" },
             { value: "unsure", label: "I'm not sure" }
           ],
-          riskLevel: "critical"
+          riskLevel: "critical",
+          questionType: "neutral" // PHI handling isn't inherently bad if done correctly
         },
         {
           id: "hipaa2",
@@ -579,7 +489,8 @@ export function getQuestionsForBusiness(businessType, state) {
             { value: "no", label: "No BAAs in place" },
             { value: "unsure", label: "I'm not sure" }
           ],
-          riskLevel: "critical"
+          riskLevel: "critical",
+          questionType: "compliance" // "yes_all_current" is required
         },
         {
           id: "hipaa3",
@@ -592,7 +503,8 @@ export function getQuestionsForBusiness(businessType, state) {
             { value: "unsure", label: "I'm not sure" }
           ],
           multiSelect: true,
-          riskLevel: "critical"
+          riskLevel: "critical",
+          questionType: "compliance" // "comprehensive" is best
         },
         
         // Data Privacy & Tracking Section
@@ -606,7 +518,8 @@ export function getQuestionsForBusiness(businessType, state) {
             { value: "no", label: "No tracking pixels" },
             { value: "unsure", label: "I'm not sure" }
           ],
-          riskLevel: "critical"
+          riskLevel: "critical",
+          questionType: "risk" // "no" is safest for compliance
         },
         {
           id: "tracking2",
@@ -619,7 +532,8 @@ export function getQuestionsForBusiness(businessType, state) {
             { value: "no", label: "No data sharing" },
             { value: "unsure", label: "I'm not sure" }
           ],
-          riskLevel: "high"
+          riskLevel: "high",
+          questionType: "risk" // "no" is safest
         },
         
         // Technical Infrastructure Section
@@ -634,7 +548,8 @@ export function getQuestionsForBusiness(businessType, state) {
             { value: "hybrid", label: "Hybrid setup" },
             { value: "unsure", label: "I'm not sure" }
           ],
-          riskLevel: "high"
+          riskLevel: "high",
+          questionType: "compliance" // "hipaa_cloud" is best for PHI
         },
         {
           id: "infrastructure2",
@@ -647,35 +562,8 @@ export function getQuestionsForBusiness(businessType, state) {
             { value: "no", label: "No formal audits" },
             { value: "unsure", label: "I'm not sure" }
           ],
-          riskLevel: "medium"
-        },
-        
-        // API & Integration Security Section
-        {
-          id: "api1",
-          section: "API & Integration Security",
-          description: "Do you integrate with Electronic Health Record (EHR) systems?",
-          options: [
-            { value: "yes_multiple", label: "Yes, multiple EHR systems" },
-            { value: "yes_single", label: "Yes, single EHR system" },
-            { value: "planned", label: "Planned integration" },
-            { value: "no", label: "No EHR integrations" }
-          ],
-          riskLevel: "medium"
-        },
-        {
-          id: "api2",
-          section: "API & Integration Security",
-          description: "How do you authenticate and authorize API access?",
-          dependsOn: { questionId: "api1", values: ["yes_multiple", "yes_single"] },
-          options: [
-            { value: "oauth_secure", label: "OAuth 2.0 with secure tokens" },
-            { value: "api_keys", label: "API keys" },
-            { value: "basic_auth", label: "Basic authentication" },
-            { value: "custom", label: "Custom authentication" },
-            { value: "unsure", label: "I'm not sure" }
-          ],
-          riskLevel: "high"
+          riskLevel: "medium",
+          questionType: "compliance" // "yes_regular" is best
         },
         
         // User Access & Identity Management Section
@@ -690,7 +578,8 @@ export function getQuestionsForBusiness(businessType, state) {
             { value: "sso_integration", label: "Single sign-on integration" },
             { value: "mixed", label: "Mixed authentication methods" }
           ],
-          riskLevel: "medium"
+          riskLevel: "medium",
+          questionType: "compliance" // "mfa_required" is best
         },
         {
           id: "access2",
@@ -702,36 +591,8 @@ export function getQuestionsForBusiness(businessType, state) {
             { value: "no", label: "No role-based controls" },
             { value: "unsure", label: "I'm not sure" }
           ],
-          riskLevel: "medium"
-        },
-        
-        // Compliance Certifications Section
-        {
-          id: "certifications1",
-          section: "Compliance Certifications",
-          description: "Do you have any formal security or compliance certifications?",
-          options: [
-            { value: "soc2", label: "SOC 2 Type II" },
-            { value: "hipaa_assessment", label: "HIPAA Risk Assessment" },
-            { value: "iso27001", label: "ISO 27001" },
-            { value: "hitrust", label: "HITRUST CSF" },
-            { value: "multiple", label: "Multiple certifications" },
-            { value: "none", label: "No formal certifications" }
-          ],
-          multiSelect: true,
-          riskLevel: "low"
-        },
-        {
-          id: "certifications2",
-          section: "Compliance Certifications",
-          description: "Do you conduct regular compliance training for your team?",
-          options: [
-            { value: "yes_regular", label: "Yes, regular training program" },
-            { value: "yes_onboarding", label: "Yes, during onboarding only" },
-            { value: "yes_irregular", label: "Yes, but irregularly" },
-            { value: "no", label: "No formal training" }
-          ],
-          riskLevel: "low"
+          riskLevel: "medium",
+          questionType: "compliance" // "yes_granular" is best
         },
         
         // Incident Response Section
@@ -745,20 +606,8 @@ export function getQuestionsForBusiness(businessType, state) {
             { value: "informal", label: "Informal procedures" },
             { value: "no", label: "No formal plan" }
           ],
-          riskLevel: "medium"
-        },
-        {
-          id: "incident2",
-          section: "Incident Response & Data Breach",
-          description: "Have you experienced any data security incidents?",
-          options: [
-            { value: "no", label: "No incidents" },
-            { value: "minor_resolved", label: "Minor incidents, resolved" },
-            { value: "major_resolved", label: "Major incidents, resolved" },
-            { value: "recent_incident", label: "Recent incident" },
-            { value: "prefer_not_answer", label: "Prefer not to answer" }
-          ],
-          riskLevel: "varies"
+          riskLevel: "medium",
+          questionType: "compliance" // "yes_comprehensive" is best
         }
       ]
     };
@@ -767,7 +616,6 @@ export function getQuestionsForBusiness(businessType, state) {
     const questions = sets[businessType] || [];
     
     if (state && questions.length > 0) {
-      // Add state-specific questions or modify risk levels based on state
       const stateSpecificAdjustments = getStateSpecificAdjustments(state);
       return applyStateAdjustments(questions, stateSpecificAdjustments);
     }
@@ -814,18 +662,54 @@ export function getQuestionsForBusiness(businessType, state) {
     });
   }
   
-  // Helper function to get follow-up questions
+  // Helper function to determine if an answer represents good compliance
+  export function isGoodAnswer(question, answer) {
+    if (!question.questionType) return false;
+    
+    switch (question.questionType) {
+      case "compliance": // Questions where "good" answers = high compliance
+        return answer === "yes_baa" || 
+               answer === "encrypted_secure" ||
+               answer === "yes_comprehensive" ||
+               answer === "explicit_checkbox" ||
+               answer === "yes_compliant" ||
+               answer === "yes_all" ||
+               answer === "yes_clinical" ||
+               answer === "yes_peer_reviewed" ||
+               answer === "yes_prominent" ||
+               answer === "licensed_medical" ||
+               answer === "yes_all_current" ||
+               answer === "yes_certified" ||
+               answer === "yes_clinical_trials" ||
+               answer === "usa_fda_registered" ||
+               answer === "yes_every_batch" ||
+               answer === "comprehensive" ||
+               answer === "hipaa_cloud" ||
+               answer === "yes_regular" ||
+               answer === "mfa_required" ||
+               answer === "yes_granular" ||
+               answer === "yes_comprehensive" ||
+               answer === "explicit_opt_in";
+               
+      case "risk": // Questions where "safe" answers = high compliance  
+        return answer === "no" ||
+               answer === "no_none" ||
+               answer === "no_claims" ||
+               answer === "no_single" ||
+               answer === "appointment_only";
+               
+      case "neutral": // Questions where answer doesn't indicate compliance level
+      default:
+        return false;
+    }
+  }
+  
+  // Export additional helper functions for compatibility
   export function getFollowUpQuestions(questionId, answers) {
-    // Implementation for dynamic follow-up questions based on previous answers
-    // This would contain logic to determine which additional questions to show
-    // based on the user's responses to previous questions
     return [];
   }
   
-  // Helper function to calculate risk score
   export function calculateRiskScore(answers, businessType) {
-    // Implementation for calculating overall compliance risk score
-    // based on answers provided
     const questions = getQuestionsForBusiness(businessType);
     let totalRisk = 0;
     let maxRisk = 0;
@@ -842,7 +726,6 @@ export function getQuestionsForBusiness(businessType, state) {
     return Math.round((totalRisk / maxRisk) * 100);
   }
   
-  // Helper function to calculate individual question risk
   function calculateQuestionRisk(question, answer) {
     const riskWeights = {
       "critical": 4,
@@ -851,16 +734,9 @@ export function getQuestionsForBusiness(businessType, state) {
       "low": 1
     };
     
-    const baseWeight = riskWeights[question.riskLevel] || 1;
-    
-    // Adjust risk based on specific answers
-    // This would contain logic to determine risk multipliers
-    // based on specific answer values
-    
-    return baseWeight;
+    return riskWeights[question.riskLevel] || 1;
   }
   
-  // Helper function to get risk weight
   function getRiskWeight(riskLevel) {
     const weights = {
       "critical": 4,

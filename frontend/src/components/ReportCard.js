@@ -16,8 +16,6 @@ import {
 } from 'lucide-react';
 import { getQuestionsForBusiness } from '../questionSets';
 
-
-
 // Sample data - replace with props in real implementation
 const sampleAnswers = {
   hipaa1: "yes",
@@ -85,62 +83,95 @@ const ReportCard = ({ answers = sampleAnswers, businessType = "Clinical care (in
     }
   };
 
-const riskWeights = {
-  critical: 5,
-  high: 4,
-  medium: 3,
-  low: 2
-};
+  const riskWeights = {
+    critical: 5,
+    high: 4,
+    medium: 3,
+    low: 2
+  };
 
-const sectionScores = useMemo(() => {
-  const scores = {};
-  const allQuestions = getQuestionsForBusiness(businessType); // Get actual questions
-  const questionMap = {};
-  allQuestions.forEach(q => {
-    questionMap[q.id] = q;
-  });
-
-  Object.entries(sections).forEach(([sectionName, sectionData]) => {
-    let totalPoints = 0;
-    let maxPoints = 0;
-
-    sectionData.questions.forEach(questionId => {
-      const answer = answers[questionId];
-      const question = questionMap[questionId];
-
-      if (question && answer) {
-        const weight = riskWeights[question.riskLevel] || 1;
-        maxPoints += weight;
-
-        if (Array.isArray(answer)) {
-          totalPoints += weight * 1.75; // generous multi-select partial credit
-        } else if (
-          ['yes', 'yes_both', 'yes_automated', 'yes_controlled', 'yes_clinical', 'yes_peer_reviewed'].includes(answer)
-        ) {
-          totalPoints += weight * 2; // super-boost for yes answers
-        } else if (answer === 'unsure') {
-          totalPoints += weight * 0.75; // softer penalty
-        }
-        
-        // else (e.g., 'no') = 0
-      }
+  const sectionScores = useMemo(() => {
+    const scores = {};
+    const allQuestions = getQuestionsForBusiness(businessType);
+    const questionMap = {};
+    allQuestions.forEach(q => {
+      questionMap[q.id] = q;
     });
 
-    const score = maxPoints > 0 ? Math.min(10, Math.round((totalPoints / maxPoints) * 10)) : 0;
+    Object.entries(sections).forEach(([sectionName, sectionData]) => {
+      let totalPoints = 0;
+      let maxPoints = 0;
 
+      sectionData.questions.forEach(questionId => {
+        const answer = answers[questionId];
+        const question = questionMap[questionId];
 
-    scores[sectionName] = {
-      score,
-      totalPoints,
-      maxPoints,
-      riskLevel: score >= 8 ? 'low' : score >= 4 ? 'moderate' : 'high'
-    };
-    
-  });
+        if (question && answer) {
+          const weight = riskWeights[question.riskLevel] || 1;
+          maxPoints += weight;
 
-  return scores;
-}, [answers, businessType]);
+          // FIXED SCORING: Higher scores = Better compliance
+          if (isGoodAnswer(question, answer)) {
+            totalPoints += weight; // Full points for good answers
+          } else if (answer === 'unsure') {
+            totalPoints += weight * 0.5; // Half points for unsure
+          }
+          // Bad answers get 0 points
+        }
+      });
 
+      // Convert to 0-10 scale where 10 = perfect compliance
+      const score = maxPoints > 0 ? Math.round((totalPoints / maxPoints) * 10) : 0;
+
+      scores[sectionName] = {
+        score,
+        totalPoints,
+        maxPoints,
+        // FIXED: Higher scores = Lower risk (better compliance)
+        riskLevel: score >= 7 ? 'low' : score >= 4 ? 'moderate' : 'high'
+      };
+    });
+
+    return scores;
+  }, [answers, businessType]);
+
+  // Helper function to determine if an answer represents good compliance
+  const isGoodAnswer = (question, answer) => {
+    // Questions where "yes" is GOOD (compliance questions)
+    const yesIsGood = [
+      'hipaa2', 'hipaa_advanced1', 'hipaa_advanced2', 'hipaa_advanced3',
+      'email2', 'telehealth2', 'claims2', 'fda2', 'fda3',
+      'manufacturing2', 'ecommerce2', 'infrastructure2', 'access1', 'access2',
+      'certifications1', 'certifications2', 'incident1'
+    ];
+
+    // Questions where "no" is GOOD (risk questions)
+    const noIsGood = [
+      'hipaa1', 'tracking1', 'tracking2', 'tracking3', 'sms1', 'email1',
+      'telehealth1', 'claims1', 'ftc1', 'ftc2', 'ftc3', 'fda1',
+      'international1', 'international2', 'incident2'
+    ];
+
+    if (yesIsGood.includes(question.id)) {
+      return answer.includes && answer.includes('yes') || 
+             answer === 'yes' || 
+             answer === 'yes_all' || 
+             answer === 'yes_compliant' ||
+             answer === 'yes_comprehensive' ||
+             answer === 'comprehensive' ||
+             answer === 'mfa_required';
+    }
+
+    if (noIsGood.includes(question.id)) {
+      return answer === 'no' || 
+             answer === 'no_none' || 
+             answer === 'no_claims' ||
+             answer === 'no_single';
+    }
+
+    // Default scoring for other questions
+    return answer !== 'yes' && answer !== 'yes_automated' && answer !== 'yes_multiple';
+  };
 
   // Calculate overall score
   const overallScore = useMemo(() => {
@@ -151,7 +182,7 @@ const sectionScores = useMemo(() => {
     return Math.round(average);
   }, [sectionScores]);
 
-  const overallRiskLevel = overallScore >= 8 ? 'low' : overallScore >= 4 ? 'moderate' : 'high';
+  const overallRiskLevel = overallScore >= 7 ? 'low' : overallScore >= 4 ? 'moderate' : 'high';
 
   // Generate recommendations based on answers
   const generateRecommendations = (sectionName, sectionData) => {
@@ -159,15 +190,15 @@ const sectionScores = useMemo(() => {
     
     sectionData.questions.forEach(questionId => {
       const answer = answers[questionId];
+      const question = questionMap[questionId];
       
-      if (answer === 'yes' || answer === 'unsure') {
-        // Generate specific recommendations based on question ID and answer
+      if (question && answer && !isGoodAnswer(question, answer)) {
         const recs = getRecommendationsForQuestion(questionId, answer);
         recommendations.push(...recs);
       }
     });
     
-    return recommendations.slice(0, 3); // Limit to 3 recommendations
+    return recommendations.slice(0, 3);
   };
 
   const getRecommendationsForQuestion = (questionId, answer) => {
@@ -182,27 +213,27 @@ const sectionScores = useMemo(() => {
       state1: ["Research state-specific healthcare advertising regulations", "Implement state-compliant marketing practices"]
     };
     
-    return recommendations[questionId] || [`Review ${questionId} compliance requirements with legal counsel`];
+    return recommendations[questionId] || [`Improve ${questionId} compliance - consult with legal counsel`];
   };
 
-  // Risk level styling
+  // Risk level styling - FIXED: Green = Good, Red = Bad
   const getRiskStyling = (riskLevel) => {
     switch (riskLevel) {
-      case 'low':
+      case 'low': // Good compliance
         return {
           color: 'text-green-600',
           bg: 'bg-green-100',
           border: 'border-green-200',
           progress: 'text-green-600'
         };
-      case 'moderate':
+      case 'moderate': // Okay compliance
         return {
           color: 'text-yellow-600',
           bg: 'bg-yellow-100', 
           border: 'border-yellow-200',
           progress: 'text-yellow-600'
         };
-      case 'high':
+      case 'high': // Poor compliance
         return {
           color: 'text-red-600',
           bg: 'bg-red-100',
@@ -228,7 +259,8 @@ const sectionScores = useMemo(() => {
     const strokeDasharray = `${circumference} ${circumference}`;
     const strokeDashoffset = circumference - (score / 10) * circumference;
     
-    const riskLevel = score >= 8 ? 'low' : score >= 4 ? 'moderate' : 'high';
+    // FIXED: Higher scores = Better compliance = Green
+    const riskLevel = score >= 7 ? 'low' : score >= 4 ? 'moderate' : 'high';
     const styling = getRiskStyling(riskLevel);
 
     return (
@@ -283,11 +315,11 @@ const sectionScores = useMemo(() => {
   const generateReportText = () => {
     let report = `Healthcare Compliance Risk Assessment Report\n`;
     report += `Business Type: ${businessType}\n`;
-    report += `Overall Risk Score: ${overallScore}/10 (${overallRiskLevel.toUpperCase()})\n\n`;
+    report += `Overall Compliance Score: ${overallScore}/10 (${overallRiskLevel.toUpperCase()} RISK)\n\n`;
     
     Object.entries(sectionScores).forEach(([section, data]) => {
       if (data.maxPoints > 0) {
-        report += `${section}: ${data.score}/10 (${data.riskLevel.toUpperCase()})\n`;
+        report += `${section}: ${data.score}/10 (${data.riskLevel.toUpperCase()} RISK)\n`;
         const recommendations = generateRecommendations(section, sections[section]);
         recommendations.forEach(rec => {
           report += `  • ${rec}\n`;
@@ -320,10 +352,10 @@ const sectionScores = useMemo(() => {
             <CircularProgress score={overallScore} size="lg" />
             <div>
               <h2 className="text-2xl font-bold text-gray-900">
-                Overall Risk Score
+                Overall Compliance Score
               </h2>
               <p className={`text-lg font-semibold ${overallStyling.color}`}>
-                {overallScore}/10 - {overallRiskLevel.charAt(0).toUpperCase() + overallRiskLevel.slice(1)} Risk
+                {overallScore}/10 - {overallRiskLevel === 'low' ? 'Good Compliance' : overallRiskLevel === 'moderate' ? 'Needs Improvement' : 'Urgent Action Required'}
               </p>
               <p className="text-sm text-gray-600 mt-1">
                 Based on {Object.values(sectionScores).filter(s => s.maxPoints > 0).length} compliance areas
@@ -377,9 +409,10 @@ const sectionScores = useMemo(() => {
                       {sectionName}
                     </h3>
                     <p className={`text-xs ${styling.color} font-medium`}>
-  {score.riskLevel === 'low' ? 'High' : score.riskLevel === 'moderate' ? 'Medium' : 'Low'} Compliance
-</p>
-
+                      {score.riskLevel === 'low' ? 'Good Compliance' : 
+                       score.riskLevel === 'moderate' ? 'Needs Improvement' : 
+                       'Urgent Action Required'}
+                    </p>
                   </div>
                 </div>
                 <CircularProgress score={score.score} size="sm" />
@@ -388,7 +421,7 @@ const sectionScores = useMemo(() => {
               {/* Progress Bar */}
               <div className="mb-4">
                 <div className="flex justify-between text-xs text-gray-600 mb-1">
-                <span>Compliance Score</span>
+                  <span>Compliance Score</span>
                   <span>{score.score}/10</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
