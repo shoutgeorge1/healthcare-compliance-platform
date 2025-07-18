@@ -14,7 +14,7 @@ import {
   XCircle,
   AlertCircle
 } from 'lucide-react';
-import { getQuestionsForBusiness } from '../questionSets';
+import { getQuestionsForBusiness, isGoodAnswer } from '../questionSets';
 
 // Sample data - replace with props in real implementation
 const sampleAnswers = {
@@ -132,50 +132,17 @@ const ReportCard = ({ answers = sampleAnswers, businessType = "Clinical care (in
       };
     });
 
+    // Store questionMap for use in recommendations
+    scores._questionMap = questionMap;
     return scores;
   }, [answers, businessType]);
 
-  // Helper function to determine if an answer represents good compliance
-  const isGoodAnswer = (question, answer) => {
-    // Questions where "yes" is GOOD (compliance questions)
-    const yesIsGood = [
-      'hipaa2', 'hipaa_advanced1', 'hipaa_advanced2', 'hipaa_advanced3',
-      'email2', 'telehealth2', 'claims2', 'fda2', 'fda3',
-      'manufacturing2', 'ecommerce2', 'infrastructure2', 'access1', 'access2',
-      'certifications1', 'certifications2', 'incident1'
-    ];
-
-    // Questions where "no" is GOOD (risk questions)
-    const noIsGood = [
-      'hipaa1', 'tracking1', 'tracking2', 'tracking3', 'sms1', 'email1',
-      'telehealth1', 'claims1', 'ftc1', 'ftc2', 'ftc3', 'fda1',
-      'international1', 'international2', 'incident2'
-    ];
-
-    if (yesIsGood.includes(question.id)) {
-      return answer.includes && answer.includes('yes') || 
-             answer === 'yes' || 
-             answer === 'yes_all' || 
-             answer === 'yes_compliant' ||
-             answer === 'yes_comprehensive' ||
-             answer === 'comprehensive' ||
-             answer === 'mfa_required';
-    }
-
-    if (noIsGood.includes(question.id)) {
-      return answer === 'no' || 
-             answer === 'no_none' || 
-             answer === 'no_claims' ||
-             answer === 'no_single';
-    }
-
-    // Default scoring for other questions
-    return answer !== 'yes' && answer !== 'yes_automated' && answer !== 'yes_multiple';
-  };
-
   // Calculate overall score
   const overallScore = useMemo(() => {
-    const validScores = Object.values(sectionScores).filter(s => s.maxPoints > 0);
+    const validScores = Object.entries(sectionScores)
+      .filter(([key, s]) => key !== '_questionMap' && s.maxPoints > 0)
+      .map(([key, s]) => s);
+    
     if (validScores.length === 0) return 0;
     
     const average = validScores.reduce((sum, s) => sum + s.score, 0) / validScores.length;
@@ -187,6 +154,7 @@ const ReportCard = ({ answers = sampleAnswers, businessType = "Clinical care (in
   // Generate recommendations based on answers
   const generateRecommendations = (sectionName, sectionData) => {
     const recommendations = [];
+    const questionMap = sectionScores._questionMap || {};
     
     sectionData.questions.forEach(questionId => {
       const answer = answers[questionId];
@@ -318,7 +286,7 @@ const ReportCard = ({ answers = sampleAnswers, businessType = "Clinical care (in
     report += `Overall Compliance Score: ${overallScore}/10 (${overallRiskLevel.toUpperCase()} RISK)\n\n`;
     
     Object.entries(sectionScores).forEach(([section, data]) => {
-      if (data.maxPoints > 0) {
+      if (section !== '_questionMap' && data.maxPoints > 0) {
         report += `${section}: ${data.score}/10 (${data.riskLevel.toUpperCase()} RISK)\n`;
         const recommendations = generateRecommendations(section, sections[section]);
         recommendations.forEach(rec => {
@@ -358,7 +326,7 @@ const ReportCard = ({ answers = sampleAnswers, businessType = "Clinical care (in
                 {overallScore}/10 - {overallRiskLevel === 'low' ? 'Good Compliance' : overallRiskLevel === 'moderate' ? 'Needs Improvement' : 'Urgent Action Required'}
               </p>
               <p className="text-sm text-gray-600 mt-1">
-                Based on {Object.values(sectionScores).filter(s => s.maxPoints > 0).length} compliance areas
+                Based on {Object.entries(sectionScores).filter(([key, s]) => key !== '_questionMap' && s.maxPoints > 0).length} compliance areas
               </p>
             </div>
           </div>
