@@ -377,8 +377,9 @@ const sectionScores = useMemo(() => {
                       {sectionName}
                     </h3>
                     <p className={`text-xs ${styling.color} font-medium`}>
-                      {score.riskLevel.charAt(0).toUpperCase() + score.riskLevel.slice(1)} Risk
-                    </p>
+  {score.riskLevel === 'low' ? 'High' : score.riskLevel === 'moderate' ? 'Medium' : 'Low'} Compliance
+</p>
+
                   </div>
                 </div>
                 <CircularProgress score={score.score} size="sm" />
@@ -387,7 +388,7 @@ const sectionScores = useMemo(() => {
               {/* Progress Bar */}
               <div className="mb-4">
                 <div className="flex justify-between text-xs text-gray-600 mb-1">
-                  <span>Risk Level</span>
+                <span>Compliance Score</span>
                   <span>{score.score}/10</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
